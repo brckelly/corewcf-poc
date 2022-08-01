@@ -15,9 +15,14 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddServiceModelServices().AddServiceModelMetadata();
 builder.Services.AddSingleton<IServiceBehavior, UseRequestHeadersForMetadataAddressBehavior>();
 
+builder.Services.AddServiceModelWebServices();
+
 builder.Services.AddScoped<SomeCoolService>();
 
 var app = builder.Build();
+
+var serviceMetadataBehavior = app.Services.GetRequiredService<CoreWCF.Description.ServiceMetadataBehavior>();
+serviceMetadataBehavior.HttpGetEnabled = true;
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -28,8 +33,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseServiceModel(builder =>
 {
-    builder.AddService<SomeCoolService>().AddServiceEndpoint<SomeCoolService, ISomeCoolService>(new BasicHttpBinding(), "SomeCoolService.svc");
-    //////builder.AddServiceWebEndpoint<NotificationServer, INotificationService>(new WebHttpBinding(), "json");
+    builder.AddService<SomeCoolService>();
+    builder.AddServiceEndpoint<SomeCoolService, ISomeCoolService>(new BasicHttpBinding(), "SomeCoolService.svc");
+    builder.AddServiceWebEndpoint<SomeCoolService, ISomeCoolService>(new WebHttpBinding(), "SomeCoolService.svc/json");
 });
 
 app.UseHttpsRedirection();
